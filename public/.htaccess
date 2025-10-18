@@ -13,6 +13,10 @@
     RewriteCond %{HTTP:x-xsrf-token} .
     RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
 
+    # Handle X-App-Identifier Header
+    RewriteCond %{HTTP:x-app-identifier} .
+    RewriteRule .* - [E=HTTP_X_APP_IDENTIFIER:%{HTTP:X-App-Identifier}]
+
     # Redirect Trailing Slashes If Not A Folder...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} (.+)/$

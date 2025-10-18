@@ -15,29 +15,13 @@ class ApiOnly
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Allow requests with API tokens (Sanctum)
-        if ($request->bearerToken()) {
+        // Always allow requests with proper API headers (mobile app)
+        // Check for Accept: application/json header OR Bearer token
+        if ($request->expectsJson() || $request->bearerToken() || $request->hasHeader('X-App-Identifier')) {
             return $next($request);
         }
 
-        // Allow requests with Accept: application/json header (API clients)
-        if ($request->expectsJson()) {
-            return $next($request);
-        }
-
-        // Allow requests to specific public endpoints (like login, register)
-        $publicEndpoints = [
-            'api/register',
-            'api/login',
-            'api/forgot-password',
-            'api/reset-password',
-        ];
-
-        if (in_array($request->path(), $publicEndpoints)) {
-            return $next($request);
-        }
-
-        // Block all browser requests
+        // Block browser requests (no Accept header, no token, no app identifier)
         return response()->json([
             'success' => false,
             'message' => 'This endpoint is only accessible via API. Please use the mobile application.',
