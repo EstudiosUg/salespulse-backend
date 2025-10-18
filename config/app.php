@@ -123,17 +123,4 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Mobile App Identifier
-    |--------------------------------------------------------------------------
-    |
-    | This is a secret identifier that your mobile app will send in headers
-    | to authenticate itself as a legitimate client. Change this to a unique
-    | random string and add it to your mobile app's HTTP headers.
-    |
-    */
-
-    'mobile_app_identifier' => env('MOBILE_APP_IDENTIFIER', 'SalesPulse-Mobile-App-2025-Secret-Key'),
-
 ];

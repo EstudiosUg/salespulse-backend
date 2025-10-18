@@ -12,15 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Register API-only middleware
-        $middleware->alias([
-            'api.only' => \App\Http\Middleware\ApiOnly::class,
-        ]);
-        
-        // Apply to all API routes
-        $middleware->group('api', [
-            \App\Http\Middleware\ApiOnly::class,
-        ]);
+        //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, $request) {
