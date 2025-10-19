@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Mail\WelcomeUserMail;
+use App\Mail\NewUserNotificationMail;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -45,6 +47,25 @@ class AuthController extends Controller
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
+
+        // Send welcome email to the new user
+        try {
+            Mail::to($user->email)->send(new WelcomeUserMail($user));
+        } catch (\Exception $e) {
+            // Log the error but don't fail the registration
+            \Log::error('Failed to send welcome email: ' . $e->getMessage());
+        }
+
+        // Send notification email to the manager
+        $managerEmail = env('MANAGER_EMAIL', 'admin@salespulse.com');
+        if ($managerEmail) {
+            try {
+                Mail::to($managerEmail)->send(new NewUserNotificationMail($user));
+            } catch (\Exception $e) {
+                // Log the error but don't fail the registration
+                \Log::error('Failed to send manager notification: ' . $e->getMessage());
+            }
+        }
 
         return response()->json([
             'success' => true,
