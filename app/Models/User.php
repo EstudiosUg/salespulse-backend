@@ -93,4 +93,27 @@ class User extends Authenticatable
     {
         return $this->isPremium();
     }
+
+    /**
+     * Get the full avatar URL
+     */
+    public function getAvatarUrlAttribute(): ?string
+    {
+        if (!$this->avatar) {
+            return null;
+        }
+
+        // If avatar already contains full URL, return as is
+        if (str_starts_with($this->avatar, 'http')) {
+            return $this->avatar;
+        }
+
+        // Otherwise, construct the full URL
+        return url('storage/avatars/' . $this->avatar);
+    }
+
+    /**
+     * Append avatar_url to JSON responses
+     */
+    protected $appends = ['avatar_url'];
 }
