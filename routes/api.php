@@ -8,12 +8,17 @@ use App\Http\Controllers\Api\ExpensesController;
 use App\Http\Controllers\Api\SuppliersController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\GoogleAuthController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+
+// Google Authentication
+Route::post('/auth/google', [GoogleAuthController::class, 'login']);
+Route::post('/auth/google/verify', [GoogleAuthController::class, 'verifyToken']);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
