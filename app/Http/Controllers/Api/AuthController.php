@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Mail\WelcomeUserMail;
 use App\Mail\NewUserNotificationMail;
+use App\Mail\PasswordResetMail;
+use App\Mail\PasswordResetSuccessMail;
+use App\Mail\AccountDeletedMail;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -172,6 +175,15 @@ class AuthController extends Controller
             'password' => Hash::make($request->new_password)
         ]);
 
+        // Send password change confirmation email
+        try {
+            Mail::to($user->email)->send(
+                new PasswordResetSuccessMail($user, $request->ip(), $request->userAgent())
+            );
+        } catch (\Exception $e) {
+            \Log::error('Failed to send password change confirmation email: ' . $e->getMessage());
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Password changed successfully'
@@ -201,12 +213,22 @@ class AuthController extends Controller
             ], 400);
         }
 
+        // Send account deletion confirmation email before deleting
+        try {
+            Mail::to($user->email)->send(new AccountDeletedMail($user, 30)); // 30 days restore period
+        } catch (\Exception $e) {
+            \Log::error('Failed to send account deletion email: ' . $e->getMessage());
+        }
+
+        // Delete all user tokens
         $user->tokens()->delete();
+        
+        // Delete user account
         $user->delete();
 
         return response()->json([
             'success' => true,
-            'message' => 'Account deleted successfully'
+            'message' => 'Account deleted successfully. You have 30 days to restore it if you change your mind.'
         ]);
     }
 
@@ -247,16 +269,11 @@ class AuthController extends Controller
             ]
         );
 
-        // Send email with reset code
+        // Send email with reset code using professional template
         try {
-            Mail::raw(
-                "Your password reset code is: {$resetCode}\n\nThis code will expire in 60 minutes.\n\nIf you didn't request a password reset, please ignore this email.",
-                function ($message) use ($request) {
-                    $message->to($request->email)
-                        ->subject('Password Reset Code - SalesPulse');
-                }
-            );
+            Mail::to($user->email)->send(new PasswordResetMail($user, $resetCode));
         } catch (\Exception $e) {
+            \Log::error('Failed to send password reset email: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to send reset email. Please try again later.'
@@ -335,6 +352,15 @@ class AuthController extends Controller
         DB::table('password_reset_tokens')
             ->where('email', $request->email)
             ->delete();
+
+        // Send password reset success email
+        try {
+            Mail::to($user->email)->send(
+                new PasswordResetSuccessMail($user, $request->ip(), $request->userAgent())
+            );
+        } catch (\Exception $e) {
+            \Log::error('Failed to send password reset success email: ' . $e->getMessage());
+        }
 
         return response()->json([
             'success' => true,

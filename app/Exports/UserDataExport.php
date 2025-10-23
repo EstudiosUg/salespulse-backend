@@ -21,7 +21,7 @@ class UserDataExport implements FromCollection, WithHeadings
 
         // Add Sales Records section
         $result->push(['SALES RECORDS']);
-        $result->push(['Date', 'Product Name', 'Price', 'Quantity', 'Total Amount', 'Commission', 'Commission Paid', 'Supplier', 'Feedback']);
+        $result->push(['Date', 'Product Name', 'Price', 'Quantity', 'Total Amount', 'Profit', 'Profit Paid', 'Supplier', 'Feedback']);
         
         if (isset($this->data['sales'])) {
             foreach ($this->data['sales'] as $sale) {
@@ -89,7 +89,7 @@ class UserDataExport implements FromCollection, WithHeadings
 
         $result->push(['Total Sales', number_format($totalSales, 2)]);
         $result->push(['Total Expenses', number_format($totalExpenses, 2)]);
-        $result->push(['Total Commission', number_format($totalCommission, 2)]);
+        $result->push(['Total Profit', number_format($totalCommission, 2)]);
         $result->push(['Net Income', number_format($netIncome, 2)]);
         $result->push(['Total Products', $totalProducts]);
 
